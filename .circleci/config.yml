@@ -17,7 +17,33 @@ jobs:
             - /src/node_modules
       - run: npm run lint
 
+  test:
+    executor: docker-base-image
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - "npm-packages"
+      - run: npm i
+      - run: npm run test
+  
+  analyze:
+    executor: docker-base-image
+    steps:
+      - checkout
+      - restore_cache:
+          keys:
+            - "npm-packages"
+      - run: npm audit
+
 workflows:
   pre-deploy:
     jobs:
       - build
+      - test:
+          requires:
+            - build
+      - analyze:
+          requires:
+            - test
+
